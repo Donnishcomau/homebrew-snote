@@ -1,0 +1,25 @@
+# PRIVATE DRAFT (#444): the tap's CI, copied to Donnishcomau/homebrew-snote only on the owner's go. Inert here: GitHub runs
+# workflows from the repository root .github only. Actions pinned by commit SHA (GH-1), read-only token. Formulae are named by
+# tap (setup-homebrew taps this repo): Homebrew refuses `brew audit` and `brew install` on a formula path outside a tap.
+name: tests
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  formula:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: Homebrew/actions/setup-homebrew@63a2d4d8d4193eab3e62b1b782ff3ab8408f5b29
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: brew style donnishcomau/snote
+      - run: brew audit --strict --new donnishcomau/snote/snote
+      - run: brew install --build-from-source donnishcomau/snote/snote
+      - run: brew test donnishcomau/snote/snote
